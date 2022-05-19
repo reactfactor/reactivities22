@@ -41,7 +41,14 @@ export default class ActivityStore {
                     this.setActivity(activity);
                      /// add record to VM after update the date format
                     ///this.activities.push(activity);
-                    this.activityRegistry.set(activity.id,activity);
+
+                    ///this.activityRegistry.set(activity.id,activity);
+                    runInAction(() => {
+                        ///Fixed ?: Since strict-mode is enabled, changing (observed) observable values without using an action is not allowed
+                        this.activityRegistry.set(activity.id,activity);
+                    })
+
+                    
 
                       this.setLoadingInitial(false);
             })
