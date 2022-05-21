@@ -4,13 +4,15 @@ import { Activity } from "../models/activity";
  //Removed by Video 88 at 5:53
 //import {v4 as uuid} from 'uuid'
 
+import {format} from 'date-fns';
+
 export default class ActivityStore {
     //activities: Activity[] = [];
     activityRegistry = new Map<string,Activity>();
     selectedActivity: Activity | undefined = undefined;
     editMode = false;
     loading = false;
-    loadingInitial =  true;
+    loadingInitial =  false;
 
     constructor() {
         makeAutoObservable(this)
@@ -18,14 +20,14 @@ export default class ActivityStore {
 
     get activitiesByDate() {
         return Array.from(this.activityRegistry.values()).sort((a,b) =>
-        Date.parse(a.date) - Date.parse(b.date));
+        a.date!.getTime() - b.date!.getTime());
     }
 
         // this returns an object grouped by Date, each Date has a group of Activity[]
     get groupedActivities() {
         return Object.entries(
             this.activitiesByDate.reduce((activities, activity) => {
-                const date = activity.date;
+                const date = format(activity.date!,'dd MMMM yyyy');
                 activities[date] = activities[date] ? [...activities[date], activity]: [activity];
                 return activities;
             }, {} as {[key: string]: Activity[]})
@@ -84,7 +86,7 @@ export default class ActivityStore {
     }
     
     private setActivity = (activity: Activity) => {
-        activity.date = activity.date.split('T')[0];
+        activity.date = new Date(activity.date!);
             this.activityRegistry.set(activity.id, activity);
     }
 
