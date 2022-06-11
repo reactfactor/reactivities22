@@ -11,7 +11,7 @@ import MyTextInput from "../../../app/common/form/MyTextInput";
 import MyTextArea from "../../../app/common/form/MyTextArea";
 import MySelectInput from "../../../app/common/form/MySelectInput";
 import { categoryOptions } from "../../../app/common/options/categoryPOptions";
-import { Activity } from "../../../app/models/activity";
+import { ActivityFormValues } from "../../../app/models/activity";
 import MyDateInput from "../../../app/common/form/MyDateInput";
 
 import {v4 as uuid} from 'uuid'
@@ -20,18 +20,10 @@ export default observer(function ActivityForm() {
     const history = useHistory();
 
     const { activityStore } = useStore();
-    const {createActivity, updateActivity,loading, loadActivity, loadingInitial } = activityStore;
+    const {createActivity, updateActivity, loadActivity, loadingInitial } = activityStore;
     const { id } = useParams<{ id: string }>();
 
-    const [activity, setActivity] = useState<Activity>({
-        id: '',
-        title: '',
-        category: '',
-        description: '',
-        date: null,
-        city: '',
-        venue: ''
-    });
+    const [activity, setActivity] = useState<ActivityFormValues>(new ActivityFormValues());
 
     const validationSchema = Yup.object({
         title: Yup.string().required('The activity title is required'),
@@ -43,15 +35,15 @@ export default observer(function ActivityForm() {
     })
 
     useEffect(() => {
-        if (id) loadActivity(id).then(activity => setActivity(activity!))
+        if (id) loadActivity(id).then(activity => setActivity(new ActivityFormValues(activity)))
     }, [id, loadActivity]);
 
     
     // V117 : comment out, replaced by formik
 
-    function handleFormSubmit(activity: Activity) {
+    function handleFormSubmit(activity: ActivityFormValues) {
         ///activity.id ? updateActivity(activity) : createActivity(activity);
-        if (activity.id.length === 0) {
+        if (!activity.id) {
             let newActivity = {
                 ...activity,
                 id: uuid()
@@ -88,7 +80,7 @@ export default observer(function ActivityForm() {
                         <MyTextInput placeholder='Venue' name='venue'  />
                         <Button 
                             disabled={isSubmitting || !dirty || !isValid}
-                            loading={loading} floated="right" positive type='submit' content='Submit' />
+                            loading={isSubmitting} floated="right" positive type='submit' content='Submit' />
                         <Button as={Link} to='/activities' floated="right" positive content='Cancel' />
                     </Form>
                 )}
