@@ -6,6 +6,7 @@ using Application.Activities;
 using Application.Core;
 using Application.Interfaces;
 using AutoMapper;
+using Infrastructure.Photos;
 using Infrastructure.Security;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -39,7 +40,10 @@ namespace API.Extensions
             
             // V159: this service gets User loggedin anywhere 
             services.AddScoped<IUserAccessor, UserAccessor>();
-
+            //V181
+            services.AddScoped<IPhotoAccessor, PhotoAccessor>();
+            // V180 
+            services.Configure<CloudinarySettings>(config.GetSection("Cloudinary"));
             return services;
         }
         
