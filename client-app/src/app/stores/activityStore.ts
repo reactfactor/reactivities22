@@ -218,4 +218,10 @@ export default class ActivityStore {
             runInAction(() => this.loading = false);
         }
     }
+
+    //V220 clear comments in cache before moving to other Activity
+    clearSelectedActivity = () => {
+        this.selectedActivity = undefined;
+    }
+
 }

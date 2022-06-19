@@ -16,8 +16,8 @@ namespace API.Extensions
 {
     public static class IdentityServiceExtensions
     {
-        public static IServiceCollection AddIdentityServices(this IServiceCollection services, 
-        IConfiguration config)   
+        public static IServiceCollection AddIdentityServices(this IServiceCollection services,
+        IConfiguration config)
         {
             services.AddIdentityCore<AppUser>(opt =>
             {
@@ -27,7 +27,7 @@ namespace API.Extensions
             .AddEntityFrameworkStores<DataContext>()
             .AddSignInManager<SignInManager<AppUser>>();
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"])); 
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]));
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(opt =>
                 {
@@ -38,10 +38,24 @@ namespace API.Extensions
                         ValidateIssuer = false,
                         ValidateAudience = false
                     };
+                    //v214
+                    opt.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var accessToken = context.Request.Query["access_token"];
+                            var path = context.HttpContext.Request.Path;
+                            if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/chat")))
+                            {
+                                context.Token = accessToken;
+                            }
+                            return Task.CompletedTask;
+                        }
+                    };
                 });
 
             // V166 
-            services.AddAuthorization(opt => 
+            services.AddAuthorization(opt =>
             {
                 opt.AddPolicy("IsActivityHost", policy =>
                 {
@@ -51,9 +65,9 @@ namespace API.Extensions
 
             services.AddTransient<IAuthorizationHandler, IsHostRequirementHandler>();
             // V166: end
-            
+
             services.AddScoped<TokenService>();
-            
+
             return services;
         }
     }

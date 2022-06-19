@@ -28,7 +28,11 @@ namespace API.Extensions
             services.AddCors(opt => {
                 opt.AddPolicy("CorsPolicy", policy => 
                 {
-                    policy.AllowAnyMethod().AllowAnyHeader().WithOrigins("http://localhost:3000");
+                    policy
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials() /// SignalR, V217
+                    .WithOrigins("http://localhost:3000");
                 });
             });
             services.AddDbContext<DataContext>(opt =>
@@ -44,6 +48,9 @@ namespace API.Extensions
             services.AddScoped<IPhotoAccessor, PhotoAccessor>();
             // V180 
             services.Configure<CloudinarySettings>(config.GetSection("Cloudinary"));
+            //V214
+            services.AddSignalR();
+            
             return services;
         }
         
